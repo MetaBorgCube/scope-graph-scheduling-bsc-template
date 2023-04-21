@@ -75,11 +75,11 @@ tc (Plus e1 e2) sc = do
   t2 <- tc e2 sc
   case (t1, t2) of
     (NumT, NumT) -> return NumT
-    (t1', NumT)  -> err $ "Expected left operand of plus expression to have type 'num', got '" ++ 
+    (t1', NumT)  -> err $ "Expected left operand of plus expression to have type 'num', got '" ++
                           show t1' ++ "'"
-    (NumT, t2')  -> err $ "Expected right operand of plus expression to have type 'num', got '" ++ 
+    (NumT, t2')  -> err $ "Expected right operand of plus expression to have type 'num', got '" ++
                           show t2' ++ "'"
-    (t1', t2')   -> err $ "Expected operands of plus expression to have type 'num', got '" ++ 
+    (t1', t2')   -> err $ "Expected operands of plus expression to have type 'num', got '" ++
                           show t1' ++ "' and '" ++
                           show t2' ++ "'"
 tc (Conditional cond tru fls) sc = do
@@ -89,7 +89,7 @@ tc (Conditional cond tru fls) sc = do
     case (cond', tru', fls') of
       (BoolT, t, f) -> do
         if t == f then return t
-        else err $ "Expected if and else branches of if-expression to have the same type, got '" ++ 
+        else err $ "Expected if and else branches of if-expression to have the same type, got '" ++
                     show t ++ "' and '" ++ show f ++ "' instead"
       (c, _, _) -> err $ "Expected condition of if-expression to be boolean, got '" ++ show c ++ "'"
 tc (Nil t) _ = return $ ListT t
@@ -110,8 +110,13 @@ tc (Tail e) sc = do
   case t of
     t'@(ListT _) -> return t'
     _ -> err $ "Expected head operator to take list, got '" ++ show t ++ "'"
-tc (Tuple ts) sc = undefined
-tc (Index i e) sc = undefined
+tc (Tuple ts) sc = mapM (`tc` sc) ts <&> TupT
+tc (Index i e) sc = do
+  t <- tc e sc
+  case t of 
+    t'@(TupT ts) -> if i >= 0 && i < length ts then return $ ts !! i else err $ "Index " ++ show i ++ " out of dimensions for '" ++
+                                                                       show t' ++ "'" 
+    _ -> err $ "Projection requires tuples, got '" ++ show t ++ "'"
 tc (Let bind e) sc = undefined
 tc (App e1 e2) sc = do
   t1 <- tc e1 sc

@@ -58,6 +58,16 @@ testTailValid = do
 testTailInvalid :: IO ()
 testTailInvalid = runTCFail' $ Tail $ Num 1
 
+testTupleEmpty :: IO ()
+testTupleEmpty = do
+  t <- runTCTest (Tuple [])
+  assertEqual "Incorrect type" (TupT []) $ fst t
+
+testTupleMany :: IO ()
+testTupleMany = do
+  t <- runTCTest (Tuple [Num 1, Tru, Fls, Tuple []])
+  assertEqual "Incorrect type" (TupT [NumT, BoolT, BoolT, TupT []]) $ fst t
+
 tests :: Test
 tests = TestList
     -- Add your test cases to this list
@@ -68,7 +78,19 @@ tests = TestList
     , "testHeadValid" ~: testHeadValid
     , "testHeadInvalid" ~: testHeadInvalid
     , "testTailValid" ~: testTailValid
-    , "testTailInvalid" ~: testTailInvalid ]
+    , "testTailInvalid" ~: testTailInvalid
+    , "testTupleEmpty" ~: testTupleEmpty
+    , "testTupleMany" ~: testTupleMany
+    , "testIndexValid" ~: testIndexValid
+    , "testIndexInvalid" ~: testIndexInvalid ]
+
+testIndexValid :: IO ()
+testIndexValid = do
+  t <- runTCTest $ Index 0 $ Tuple [Num 1, Tru, Fls, Tuple []]
+  assertEqual "Incorrect type" NumT $ fst t
+
+testIndexInvalid :: IO ()
+testIndexInvalid = runTCFail' $ Index 1000 $ Tuple [Num 1, Tru, Fls, Tuple []]
 
 main :: IO ()
 main = do
