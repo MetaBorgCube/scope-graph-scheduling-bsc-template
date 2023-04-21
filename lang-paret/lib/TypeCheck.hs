@@ -68,6 +68,8 @@ tc :: ( Functor f
    => Expr -> Sc -> Free f Type
 
 tc (Num _) _ = return NumT
+tc Tru _ = return $ BoolT True
+tc Fls _ = return $ BoolT False
 tc (Plus e1 e2) sc = do
   t1 <- tc e1 sc
   t2 <- tc e2 sc
@@ -80,6 +82,14 @@ tc (Plus e1 e2) sc = do
     (t1', t2')   -> err $ "Expected operands of plus expression to have type 'num', got '" ++ 
                           show t1' ++ "' and '" ++
                           show t2' ++ "'"
+tc (Conditional cond tru fls) sc = undefined
+tc (Nil t) _ = return $ ListT t
+tc (Cons h t) sc = undefined
+tc (Head e) sc = undefined
+tc (Tail e) sc = undefined
+tc (Tuple ts) sc = undefined
+tc (Index i e) sc = undefined
+tc (Let bind e) sc = undefined
 tc (App e1 e2) sc = do
   t1 <- tc e1 sc
   t2 <- tc e2 sc
