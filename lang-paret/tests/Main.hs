@@ -68,6 +68,24 @@ testTupleMany = do
   t <- runTCTest (Tuple [Num 1, Tru, Fls, Tuple []])
   assertEqual "Incorrect type" (TupT [NumT, BoolT, BoolT, TupT []]) $ fst t
 
+testLetSingle :: IO ()
+testLetSingle = do
+  t <- runTCTest $ Let ("x", NumT, Num 1) $ Plus (Num 2) (Ident "x")
+  assertEqual "Incorrect type" NumT $ fst t
+
+testLetFreeIdent :: IO ()
+testLetFreeIdent = runTCFail' $ Let ("x", NumT, Num 1) $ Ident "y"
+
+testLetShadowing :: IO ()
+testLetShadowing = do
+  t <- runTCTest $ Let ("x", NumT, Num 1) $ Let ("x", BoolT, Tru) $ Ident "x"
+  assertEqual "Incorrect type" BoolT $ fst t
+
+testLetPropagation :: IO ()
+testLetPropagation = do
+  t <- runTCTest $ Let ("x", NumT, Num 1) $ Let ("y", BoolT, Tru) $ Ident "x"
+  assertEqual "Incorrect type" NumT $ fst t
+
 tests :: Test
 tests = TestList
     -- Add your test cases to this list
@@ -82,7 +100,11 @@ tests = TestList
     , "testTupleEmpty" ~: testTupleEmpty
     , "testTupleMany" ~: testTupleMany
     , "testIndexValid" ~: testIndexValid
-    , "testIndexInvalid" ~: testIndexInvalid ]
+    , "testIndexInvalid" ~: testIndexInvalid
+    , "testLetSingle" ~: testLetSingle
+    , "testLetFreeIdent" ~: testLetFreeIdent
+    , "testLetShadowing" ~: testLetShadowing
+    , "testLetPropagation" ~: testLetPropagation ]
 
 testIndexValid :: IO ()
 testIndexValid = do

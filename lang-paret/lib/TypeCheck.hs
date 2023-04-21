@@ -117,7 +117,11 @@ tc (Index i e) sc = do
     t'@(TupT ts) -> if i >= 0 && i < length ts then return $ ts !! i else err $ "Index " ++ show i ++ " out of dimensions for '" ++
                                                                        show t' ++ "'" 
     _ -> err $ "Projection requires tuples, got '" ++ show t ++ "'"
-tc (Let bind e) sc = undefined
+tc (Let (name, t, _) e) sc = do
+  s' <- new
+  edge s' P sc
+  sink s' D $ Decl name t
+  tc e s'
 tc (App e1 e2) sc = do
   t1 <- tc e1 sc
   t2 <- tc e2 sc
