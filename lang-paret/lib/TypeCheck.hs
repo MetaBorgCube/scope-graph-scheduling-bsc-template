@@ -93,9 +93,23 @@ tc (Conditional cond tru fls) sc = do
                     show t ++ "' and '" ++ show f ++ "' instead"
       (c, _, _) -> err $ "Expected condition of if-expression to be boolean, got '" ++ show c ++ "'"
 tc (Nil t) _ = return $ ListT t
-tc (Cons h t) sc = undefined
-tc (Head e) sc = undefined
-tc (Tail e) sc = undefined
+tc (Cons h t) sc = do
+  h' <- tc h sc
+  t' <- tc t sc
+  case t' of
+    t'''@(ListT t'') -> if t'' == h' then return t''' else err $ "Expected list containing '" ++ show h' ++ "' to have a tail of '" ++
+                                                           show (ListT h') ++ "', but got '" ++ show t' ++ "'"
+    _ -> err $ "Expected tail to be of '" ++ show (ListT h') ++ "', but got '" ++ show t' ++ "'"
+tc (Head e) sc = do
+  t <- tc e sc
+  case t of
+    (ListT t') -> return t'
+    _ -> err $ "Expected head operator to take list, got '" ++ show t ++ "'"
+tc (Tail e) sc = do
+  t <- tc e sc
+  case t of
+    t'@(ListT _) -> return t'
+    _ -> err $ "Expected head operator to take list, got '" ++ show t ++ "'"
 tc (Tuple ts) sc = undefined
 tc (Index i e) sc = undefined
 tc (Let bind e) sc = undefined

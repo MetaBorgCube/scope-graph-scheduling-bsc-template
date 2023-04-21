@@ -34,12 +34,41 @@ testIfCond = runTCFail' $ Conditional (Num 3) (Num 1) (Num 2)
 testIfBranch :: IO ()
 testIfBranch = runTCFail' $ Conditional Fls (Num 1) (Tru)
 
+testListValid :: IO ()
+testListValid = do
+  t <- runTCTest (Cons Tru (Cons Fls (Cons Tru (Nil BoolT))))
+  assertEqual "Incorrect type" (ListT BoolT) $ fst t
+
+testListInvalid :: IO ()
+testListInvalid = runTCFail' $ Cons Tru Fls
+
+testHeadValid :: IO ()
+testHeadValid = do
+  t <- runTCTest (Head (Cons Tru (Cons Fls (Cons Tru (Nil BoolT)))))
+  assertEqual "Incorrect type" BoolT $ fst t
+
+testHeadInvalid :: IO ()
+testHeadInvalid = runTCFail' $ Head $ Num 1
+
+testTailValid :: IO ()
+testTailValid = do
+  t <- runTCTest (Tail (Cons Tru (Cons Fls (Cons Tru (Nil BoolT)))))
+  assertEqual "Incorrect type" (ListT BoolT) $ fst t
+
+testTailInvalid :: IO ()
+testTailInvalid = runTCFail' $ Tail $ Num 1
+
 tests :: Test
 tests = TestList
     -- Add your test cases to this list
     [ "testApplicationPlus" ~: testApplicationPlus
     , "testIfValid" ~: testIfValid
-    , "testIfCond" ~: testIfCond ]
+    , "testIfCond" ~: testIfCond
+    , "testListValid" ~: testListValid
+    , "testHeadValid" ~: testHeadValid
+    , "testHeadInvalid" ~: testHeadInvalid
+    , "testTailValid" ~: testTailValid
+    , "testTailInvalid" ~: testTailInvalid ]
 
 main :: IO ()
 main = do
