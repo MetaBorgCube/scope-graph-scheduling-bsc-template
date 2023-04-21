@@ -68,8 +68,8 @@ tc :: ( Functor f
    => Expr -> Sc -> Free f Type
 
 tc (Num _) _ = return NumT
-tc Tru _ = return $ BoolT True
-tc Fls _ = return $ BoolT False
+tc Tru _ = return BoolT
+tc Fls _ = return BoolT
 tc (Plus e1 e2) sc = do
   t1 <- tc e1 sc
   t2 <- tc e2 sc
@@ -82,7 +82,16 @@ tc (Plus e1 e2) sc = do
     (t1', t2')   -> err $ "Expected operands of plus expression to have type 'num', got '" ++ 
                           show t1' ++ "' and '" ++
                           show t2' ++ "'"
-tc (Conditional cond tru fls) sc = undefined
+tc (Conditional cond tru fls) sc = do
+    cond' <- tc cond sc
+    tru' <- tc tru sc
+    fls' <- tc fls sc
+    case (cond', tru', fls') of
+      (BoolT, t, f) -> do
+        if t == f then return t
+        else err $ "Expected if and else branches of if-expression to have the same type, got '" ++ 
+                    show t ++ "' and '" ++ show f ++ "' instead"
+      (c, _, _) -> err $ "Expected condition of if-expression to be boolean, got '" ++ show c ++ "'"
 tc (Nil t) _ = return $ ListT t
 tc (Cons h t) sc = undefined
 tc (Head e) sc = undefined

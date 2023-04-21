@@ -3,7 +3,7 @@ import Data.List (intercalate)
 
 data Type
   = NumT
-  | BoolT Bool
+  | BoolT
   | FunT Type Type
   | ListT Type
   | TupT [Type]
@@ -29,7 +29,7 @@ data Expr
 
 instance Show Type where
   show NumT = "num"
-  show (BoolT v) = show v
+  show BoolT = "bool"
   show (FunT ti to) = "(" ++ show ti ++ " -> " ++ show to ++ ")"
   show (ListT i) = "[" ++ show i ++ "]"
   show (TupT t) = "(" ++ intercalate ", " (map show t) ++ ")"
